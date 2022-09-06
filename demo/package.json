@@ -20,6 +20,6 @@
     "electron": "^11.5.0"
   },
   "dependencies": {
-    "electron-pos-printer": "^1.2.4"
+    "@bookla-app/electron-pos-printer": "npm:@Bookla-app/electron-pos-printer@^2.0.1"
   }
 }

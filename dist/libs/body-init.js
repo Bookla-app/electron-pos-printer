@@ -6,13 +6,14 @@ const fs = require('fs');
 const path = require('path');
 const ipcRender = require('electron').ipcRenderer;
 
-const body = $('#main');
+const body = $('body');
+const container = $('#main');
 let barcodeNumber = 0;
 const image_format = ['apng', 'bmp', 'gif', 'ico', 'cur', 'jpeg', 'jpg', 'jpeg', 'jfif', 'pjpeg',
     'pjp', 'png', 'svg', 'tif', 'tiff', 'webp'];
 
 ipcRender.on('body-init', function (event, arg) {
-    body.css({width: arg.width ? arg.width : 170 , margin: arg.margin ? arg.margin : 0});
+    body.css({margin: arg.margin ? arg.margin : 0});
     event.sender.send('body-init-reply', {status: true, error: null});
 });
 // render each line
@@ -24,7 +25,7 @@ async function renderDataToHTML(event, arg) {
     switch (arg.line.type) {
         case 'text':
             try {
-              body.append(generatePageText(arg.line));
+              container.append(generatePageText(arg.line));
               // sending msg
               event.sender.send('render-line-reply', {status: true, error: null});
             } catch (e) {
@@ -34,7 +35,7 @@ async function renderDataToHTML(event, arg) {
         case 'image':
             await getImageFromPath(arg.line)
                 .then(img => {
-                    body.append(img);
+                    container.append(img);
                     event.sender.send('render-line-reply', {status: true, error: null});
                 }).catch(e => {
                 event.sender.send('render-line-reply', {status: false, error: e.toString()});
@@ -42,7 +43,7 @@ async function renderDataToHTML(event, arg) {
         return;
         case 'qrCode':
             try {
-                body.append(`<div id="qrCode${arg.lineIndex}" style="${arg.line.style};text-align: ${arg.line.position ? '-webkit-' + arg.line.position : '-webkit-left'};"></div>`);
+                container.append(`<div id="qrCode${arg.lineIndex}" style="${arg.line.style};text-align: ${arg.line.position ? '-webkit-' + arg.line.position : '-webkit-left'};"></div>`);
                 new QRCode(document.getElementById(`qrCode${arg.lineIndex}`), {
                   text: arg.line.value,
                   width: arg.line.width ? arg.line.width : 1,
@@ -59,7 +60,7 @@ async function renderDataToHTML(event, arg) {
         return;
         case 'barCode':
             try {
-                body.append(`<div style="width: 100%;text-align: ${arg.line.position ? arg.line.position : 'left'}"class="barcode-container" style="text-align: center;width: 100%;">
+                container.append(`<div style="width: 100%;text-align: ${arg.line.position ? arg.line.position : 'left'}"class="barcode-container" style="text-align: center;width: 100%;">
                     <img class="barCode${arg.lineIndex}"  style="${arg.line.style}"
                 jsbarcode-value="${arg.line.value}"
                 jsbarcode-width="${arg.line.width ? arg.line.width : 1}"
@@ -172,7 +173,7 @@ async function renderDataToHTML(event, arg) {
             table.append(tBody);
             table.append(tFooter);
             tableContainer.append(table);
-            body.append(tableContainer);
+            container.append(tableContainer);
             // send
             event.sender.send('render-line-reply', {status: true, error: null});
         return;

@@ -8,45 +8,59 @@
       body {
         font-family: sans-serif;
       }
+
+      .versions {
+        text-align: center;
+        font-size: 12px;
+        color: #8a8a8a;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .row label {
+        margin-bottom: 8px;
+      }
     </style>
   </head>
   <body>
-    <h1>Test printer</h1>
-    Node.js <span id="node-version"></span> - Chromium
-    <span id="chrome-version"></span> - Electron
-    <span id="electron-version"></span>.
+    <h1 style="text-align: center">Test printer</h1>
+    <div class="versions">
+      Node.js <span id="node-version"></span> - Chromium
+      <span id="chrome-version"></span> - Electron
+      <span id="electron-version"></span>.
+    </div>
 
     <div>
       <form name>
-        <p>List of printers:</p>
-
-        <div id="list_printers"></div>
-
-        <br />
-
-        <p>Width</p>
-        <input type="radio" id="w1" name="width" value="140px" checked />
-        <label for="w1">140px</label><br />
-
-        <input type="radio" id="w2" name="width" value="170px" />
-        <label for="w2">170px</label><br />
-
-        <input type="radio" id="w3" name="width" value="200px" />
-        <label for="w3">200px</label><br />
-
-        <input type="radio" id="w4" name="width" value="250px" />
-        <label for="w4">250px</label><br />
-
-        <input type="radio" id="w5" name="width" value="300px" />
-        <label for="w5">300px</label><br />
+        <p class="row">
+          <label>List of printers:</label>
+          <div id="list_printers"></div>
+        </p>
+        <p class="row">
+          <label for="margin">Margin:</label>
+          <input id='margin' type="text" placeholder="0px" />
+        </p>
+        <p class="row">
+          <label for="pageWidth">Page Width:</label>
+          <input id='pageWidth' type="number" placeholder="0" />
+        </p>
+        <p class="row">
+          <label for="pageHeight">Page Height:</label>
+          <input id='pageHeight' type="number" placeholder="0" />
+        </p>
+        <p class="row">
+          <label for="data">Data:</label>
+          <textarea id='data' placeholder="[]" rows="20" cols="50"></textarea> 
+        </p>
       </form>
     </div>
 
-    <br />
-    <input onclick="print()" type="button" value="printer test" />
-    <br />
-    <br />
-    <br />
+    <button onclick="print(true)">Preview</button>
+    <button onclick="print(false)">Print</button> 
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>
   </body>

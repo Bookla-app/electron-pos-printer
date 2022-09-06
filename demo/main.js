@@ -1,7 +1,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const { PosPrinter } = require("@bookla-app/electron-pos-printer");
+const { PosPrinter } = require("@Bookla-app/electron-pos-printer");
 
 function createWindow() {
   // Create the browser window.

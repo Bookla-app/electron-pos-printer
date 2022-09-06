@@ -1,7 +1,7 @@
 PosPrinter.getPrinters()
   .then((printers) =>
     printers.map((item, index) => {
-      //write in the screen the printers for choose
+      // list detected printers in the screen
       document.getElementById("list_printers").innerHTML +=
         ' <input type="radio" checked=' +
         !index +
@@ -18,17 +18,23 @@ PosPrinter.getPrinters()
   )
   .catch((err) => console.error(err));
 
-// TODO: allow to set it in demo
-function getData() {
-  return [];
-}
-
-function print() {
+function print(isPreview) {
   let printerName;
-  let widthPage;
+  let data;
 
-  var p = document.getElementsByName("printer");
-  var w = document.getElementsByName("width");
+  const p = document.getElementsByName("printer");
+  const contentMargin = document.getElementById("margin").value;
+  const dataText = document.getElementById("data").value;
+  const pageWidth = document.getElementById("pageWidth").value;
+  const pageHeight = document.getElementById("pageHeight").value;
+
+  try {
+    data = JSON.parse(dataText);
+  } catch (error) {
+    console.error(error);
+    alert(`Invalid data: ${error.message}`);
+    return;
+  }
 
   for (var i = 0, length = p.length; i < length; i++) {
     if (p[i].checked) {
@@ -38,26 +44,22 @@ function print() {
     }
   }
 
-  for (var i = 0, length = w.length; i < length; i++) {
-    if (w[i].checked) {
-      widthPage = w[i].value;
-
-      break;
-    }
-  }
-
-  // TODO: allow to change options in demo
   const options = {
-    preview: true, // Preview in window or print
-    width: widthPage, //  width of content body
-    margin: "10px", // margin of content body
-    copies: 1, // Number of copies to print
-    printerName: printerName, // printerName: string, check it at webContent.getPrinters()
+    preview: isPreview,
+    margin: contentMargin,
+    copies: 1,
+    printerName,
     timeOutPerLine: 400,
     silent: true,
+    pageSize: {
+      height: +pageHeight,
+      width: +pageWidth,
+    },
   };
 
-  PosPrinter.print(getData(), options).catch((error) => {
+  console.log("options", options);
+
+  PosPrinter.print(data, options).catch((error) => {
     console.log(error);
   });
 }

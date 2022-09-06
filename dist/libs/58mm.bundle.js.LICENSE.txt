@@ -1,3 +1,0 @@
-/*! JsBarcode v3.8.0 | (c) Johan Lindell | MIT license */
-
-/*! jQuery v3.2.1 | (c) JS Foundation and other contributors | jquery.org/license */

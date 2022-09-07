@@ -59,7 +59,11 @@ function print(isPreview) {
 
   console.log("options", options);
 
-  PosPrinter.print(data, options).catch((error) => {
-    console.log(error);
-  });
+  PosPrinter.print(data, options)
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }

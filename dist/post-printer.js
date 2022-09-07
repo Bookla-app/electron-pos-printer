@@ -66,7 +66,6 @@ var PosPrinter = /** @class */ (function () {
     PosPrinter.print = function (data, options) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var _a, _b, _c, _d;
             // reject if printer name is not set in no preview mode
             if (!options.preview && !options.printerName) {
                 reject(new Error("A printer name is required").toString());
@@ -90,8 +89,9 @@ var PosPrinter = /** @class */ (function () {
             }
             // open electron window
             var mainWindow = new BrowserWindow({
-                width: (_b = (_a = options.pageSize) === null || _a === void 0 ? void 0 : _a.width) !== null && _b !== void 0 ? _b : 210,
-                height: (_d = (_c = options.pageSize) === null || _c === void 0 ? void 0 : _c.height) !== null && _d !== void 0 ? _d : 1200,
+                // TODO: calculate correct preview page size based on options.pageSize
+                width: 210,
+                height: 1200,
                 show: !!options.preview,
                 webPreferences: {
                     nodeIntegration: true,

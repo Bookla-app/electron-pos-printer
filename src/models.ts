@@ -27,7 +27,7 @@ export interface PosPrintOptions {
    */
   silent?: boolean;
   /**
-   * Specify the width and height of the print out page, default is A4
+   * Specify the width and height in microns of the print out page, default is A4
    */
   pageSize?: SizeOptions;
 }

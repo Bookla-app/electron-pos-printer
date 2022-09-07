@@ -1,13 +1,13 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, screen } = require("electron");
 const path = require("path");
 const { PosPrinter } = require("@Bookla-app/electron-pos-printer");
 
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 700,
+    width: screen.getPrimaryDisplay().workArea.width,
+    height: screen.getPrimaryDisplay().workArea.height,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,

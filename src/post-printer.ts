@@ -48,6 +48,7 @@ export class PosPrinter {
       });
 
       mainWindow.on("closed", () => {
+        ipcMain.removeAllListeners();
         mainWindow = null;
       });
 
@@ -85,7 +86,10 @@ export class PosPrinter {
               }
             );
           })
-          .catch((err) => reject(err));
+          .catch((err) => {
+            reject(err);
+            mainWindow.close();
+          });
       });
     });
   }
@@ -93,31 +97,29 @@ export class PosPrinter {
   private static renderPrintDocument(
     window: any,
     data: PosPrintData[]
-  ): Promise<{ message: "page-rendered" }> {
+  ): Promise<{ message: string }> {
     return new Promise((resolve, reject) => {
-      data.forEach(async (line, lineIndex) => {
+      let finishedLines = 0;
+      ipcMain.on("render-line-reply", function (event, result) {
+        if (result.status) {
+          finishedLines++;
+          if (finishedLines === data.length) {
+            // when the render process is done rendering the page, resolve
+            resolve({ message: "page-rendered" });
+          }
+        } else {
+          reject(result.error);
+        }
+      });
+      data.forEach((line, lineIndex) => {
         if (line.type === "image" && !line.path) {
-          window.close();
           reject(
             new Error("An Image path is required for type image").toString()
           );
           return;
         }
-        await sendIpcMsg("render-line", window.webContents, { line, lineIndex })
-          .then((result: any) => {
-            if (!result.status) {
-              window.close();
-              reject(result.error);
-              return;
-            }
-          })
-          .catch((error) => {
-            reject(error);
-            return;
-          });
+        window.webContents.send("render-line", { line, lineIndex });
       });
-      // when the render process is done rendering the page, resolve
-      resolve({ message: "page-rendered" });
     });
   }
 }

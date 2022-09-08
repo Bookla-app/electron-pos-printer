@@ -77,6 +77,7 @@ var PosPrinter = /** @class */ (function () {
                 },
             });
             mainWindow.on("closed", function () {
+                ipcMain.removeAllListeners();
                 mainWindow = null;
             });
             mainWindow.loadFile(__dirname + "/pos.html");
@@ -114,44 +115,37 @@ var PosPrinter = /** @class */ (function () {
                                         mainWindow.close();
                                     });
                                 })
-                                    .catch(function (err) { return reject(err); })];
+                                    .catch(function (err) {
+                                    reject(err);
+                                    mainWindow.close();
+                                })];
                     }
                 });
             }); });
         });
     };
     PosPrinter.renderPrintDocument = function (window, data) {
-        var _this = this;
         return new Promise(function (resolve, reject) {
-            data.forEach(function (line, lineIndex) { return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (line.type === "image" && !line.path) {
-                                window.close();
-                                reject(new Error("An Image path is required for type image").toString());
-                                return [2 /*return*/];
-                            }
-                            return [4 /*yield*/, sendIpcMsg("render-line", window.webContents, { line: line, lineIndex: lineIndex })
-                                    .then(function (result) {
-                                    if (!result.status) {
-                                        window.close();
-                                        reject(result.error);
-                                        return;
-                                    }
-                                })
-                                    .catch(function (error) {
-                                    reject(error);
-                                    return;
-                                })];
-                        case 1:
-                            _a.sent();
-                            return [2 /*return*/];
+            var finishedLines = 0;
+            ipcMain.on("render-line-reply", function (event, result) {
+                if (result.status) {
+                    finishedLines++;
+                    if (finishedLines === data.length) {
+                        // when the render process is done rendering the page, resolve
+                        resolve({ message: "page-rendered" });
                     }
-                });
-            }); });
-            // when the render process is done rendering the page, resolve
-            resolve({ message: "page-rendered" });
+                }
+                else {
+                    reject(result.error);
+                }
+            });
+            data.forEach(function (line, lineIndex) {
+                if (line.type === "image" && !line.path) {
+                    reject(new Error("An Image path is required for type image").toString());
+                    return;
+                }
+                window.webContents.send("render-line", { line: line, lineIndex: lineIndex });
+            });
         });
     };
     return PosPrinter;

@@ -44,33 +44,12 @@ if (process.type == "renderer") {
     throw new Error('electron-pos-printer: use remote.require("electron-pos-printer") in render process');
 }
 var _a = require("electron"), BrowserWindow = _a.BrowserWindow, ipcMain = _a.ipcMain;
-// ipcMain.on('pos-print', (event, arg)=> {
-//     const {data, options} = JSON.parse(arg);
-//     PosPrinter.print(data, options).then((arg)=>{
-//         event.sender.send('print-pos-reply', {status: true, error: {}});
-//     }).catch((err)=>{
-//         event.sender.send('print-pos-reply', {status: false, error: err});
-//     });
-// });
-/**
- * @class PosPrinter
- * **/
 var PosPrinter = /** @class */ (function () {
     function PosPrinter() {
     }
-    /**
-     * @Method: Print object
-     * @Param arg {any}
-     * @Return {Promise}
-     */
     PosPrinter.print = function (data, options) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            // reject if printer name is not set in no preview mode
-            if (!options.preview && !options.printerName) {
-                reject(new Error("A printer name is required").toString());
-            }
-            // else
             var printedState = false; // If the job has been printer or not
             var window_print_error = null; // The error returned if the printing fails
             var timeOutPerline = options.timeOutPerLine
@@ -87,7 +66,6 @@ var PosPrinter = /** @class */ (function () {
                     }
                 }, timeOutPerline * data.length + 200);
             }
-            // open electron window
             var mainWindow = new BrowserWindow({
                 // TODO: calculate correct preview page size based on options.pageSize
                 width: 210,
@@ -98,71 +76,43 @@ var PosPrinter = /** @class */ (function () {
                     contextIsolation: false,
                 },
             });
-            // mainWindow
             mainWindow.on("closed", function () {
                 mainWindow = null;
             });
-            /*mainWindow.loadURL(url.format({
-                      pathname: path.join(__dirname, 'print.html'),
-                      protocol: 'file:',
-                      slashes: true,
-                      // baseUrl: 'dist'
-                  }));*/
             mainWindow.loadFile(__dirname + "/pos.html");
             mainWindow.webContents.on("did-finish-load", function () { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: 
-                        // get system printers
-                        // const system_printers = mainWindow.webContents.getPrinters();
-                        // const printer_index = system_printers.findIndex(sp => sp.name === options.printerName);
-                        // // if system printer isn't found!!
-                        // if (!options.preview && printer_index == -1) {
-                        //     reject(new Error(options.printerName + ' not found. Check if this printer was added to your computer or try updating your drivers').toString());
-                        //     return;
-                        // }
-                        // else start initialize render prcess page
+                        // start initialization of render process page
                         return [4 /*yield*/, sendIpcMsg("body-init", mainWindow.webContents, options)];
                         case 1:
-                            // get system printers
-                            // const system_printers = mainWindow.webContents.getPrinters();
-                            // const printer_index = system_printers.findIndex(sp => sp.name === options.printerName);
-                            // // if system printer isn't found!!
-                            // if (!options.preview && printer_index == -1) {
-                            //     reject(new Error(options.printerName + ' not found. Check if this printer was added to your computer or try updating your drivers').toString());
-                            //     return;
-                            // }
-                            // else start initialize render prcess page
+                            // start initialization of render process page
                             _a.sent();
-                            /**
-                             * Render print data as html in the mainwindow render process
-                             *
-                             */
+                            // Render print data as html in the mainwindow render process
                             return [2 /*return*/, PosPrinter.renderPrintDocument(mainWindow, data)
                                     .then(function () {
-                                    if (!options.preview) {
-                                        mainWindow.webContents.print({
-                                            silent: !!options.silent,
-                                            printBackground: true,
-                                            deviceName: options.printerName,
-                                            copies: options.copies ? options.copies : 1,
-                                            pageSize: options.pageSize ? options.pageSize : "A4",
-                                        }, function (arg, err) {
-                                            // console.log(arg, err);
-                                            if (err) {
-                                                window_print_error = err;
-                                                reject(err);
-                                            }
-                                            if (!printedState) {
-                                                resolve({ complete: arg });
-                                                printedState = true;
-                                            }
-                                            mainWindow.close();
-                                        });
-                                    }
-                                    else {
+                                    if (options.preview) {
                                         resolve({ complete: true });
+                                        return;
                                     }
+                                    mainWindow.webContents.print({
+                                        silent: !!options.silent,
+                                        printBackground: true,
+                                        deviceName: options.printerName,
+                                        copies: options.copies ? options.copies : 1,
+                                        pageSize: options.pageSize ? options.pageSize : "A4",
+                                    }, function (success, err) {
+                                        if (err) {
+                                            window_print_error = err;
+                                            reject(err);
+                                        }
+                                        if (!printedState) {
+                                            resolve({ complete: success });
+                                            printedState = true;
+                                        }
+                                        mainWindow.close();
+                                    });
                                 })
                                     .catch(function (err) { return reject(err); })];
                     }
@@ -170,13 +120,6 @@ var PosPrinter = /** @class */ (function () {
             }); });
         });
     };
-    /**
-     * @Method
-     * @Param data {any[]}
-     * @Return {Promise}
-     * @description Render the print data in the render process
-     *
-     */
     PosPrinter.renderPrintDocument = function (window, data) {
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -214,11 +157,6 @@ var PosPrinter = /** @class */ (function () {
     return PosPrinter;
 }());
 exports.PosPrinter = PosPrinter;
-/**
- * @function sendMsg
- * @description Sends messages to the render process to render the data specified in the PostPrintDate interface and recieves a status of true
- *
- */
 function sendIpcMsg(channel, webContents, arg) {
     return new Promise(function (resolve, reject) {
         ipcMain.once("".concat(channel, "-reply"), function (event, result) {

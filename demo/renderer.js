@@ -3,9 +3,7 @@ PosPrinter.getPrinters()
     printers.map((item, index) => {
       // list detected printers in the screen
       document.getElementById("list_printers").innerHTML +=
-        ' <input type="radio" checked=' +
-        !index +
-        ' id="printer_' +
+        ' <input type="radio" id="printer_' +
         index +
         '" name="printer" value="' +
         item.name +

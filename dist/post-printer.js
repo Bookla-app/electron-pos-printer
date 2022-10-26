@@ -67,9 +67,8 @@ var PosPrinter = /** @class */ (function () {
                 }, timeOutPerline * data.length + 200);
             }
             var mainWindow = new BrowserWindow({
-                // TODO: calculate correct preview page size based on options.pageSize
-                width: 210,
-                height: 1200,
+                width: options.windowSize ? options.windowSize.width || 210 : 210,
+                height: options.windowSize ? options.windowSize.height || 1200 : 1200,
                 show: !!options.preview,
                 webPreferences: {
                     nodeIntegration: true,
